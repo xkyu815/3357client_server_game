@@ -4,8 +4,7 @@ from urllib.parse import urlparse
 import signal
 import sys
 
-serverAddressPort   = ("127.0.0.1", 7777)
-bufferSize          = 1024
+bufferSize = 1024
 
 parser = argparse.ArgumentParser("client parameters passed")
 parser.add_argument('playerName',type=str,help = "name of player")
@@ -16,6 +15,7 @@ playerName = options.playerName
 hostname = parse_result.hostname
 port = parse_result.port
 
+serverAddressPort   = ("127.0.0.1", port)
 # Create a UDP socket at client side
 
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
