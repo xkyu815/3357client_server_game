@@ -43,10 +43,11 @@ while(True):
 
     clientMsg = "Room Starting Description:\n\n{}\n\n{}".format(name,description)
     print(clientMsg)
-   # msgFromClient = UDPServerSocket.recvfrom(bufferSize)
-   # pw_bytes = msgFromClient[0].decode("utf-8")
-   # print(pw_bytes)
-
+  
     # Sending a reply to client
 
     UDPServerSocket.sendto(bytesToSend,address)
+
+	# Receiving a request from client
+    pw_bytes = message.decode("utf-8")
+    print(pw_bytes,address)
