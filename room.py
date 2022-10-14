@@ -1,9 +1,9 @@
 import socket
 import argparse
 import signal
+import sys
 
 localIP     = "127.0.0.1"
-##localPort   = 7777
 bufferSize  = 1024
 
 parser = argparse.ArgumentParser("server parameters passed")
@@ -29,10 +29,6 @@ UDPServerSocket.bind((localIP, localPort))
 print("UDP server up and listening")
 
  # Listen for incoming datagrams
-
-#def dosomthing(port=options.port, name=options.name, 
-#				description=options.description, items=options.items):
-#				return 0
 
 # initialize inventory
 user_inventory = []
@@ -67,30 +63,37 @@ def drop(item):
 	if item not in user_inventory:
 		mesg = "You are not holding {}".format(item)
 	else:
-		itemInRoom.append(item)
 		user_inventory.remove(item)
+		itemInRoom.append(item)
 		mesg = "You are dropping {}".format(item)
 	return mesg
 
-def exit(signum, frame):
-	exit(1)
+def exit(sig, frame):
+	while user_inventory != []:
+		drop(user_inventory[0])
+	sys.exit(0)
 
-bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-mesg_description = "Room Starting Description:\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description,"\n".join(items))
-bytesToSend = str.encode(mesg_description)
-message = bytesAddressPair[0]
-address = bytesAddressPair[1]
-
-clientMsg = "Room Starting Description:\n\n{}\n\n{}".format(name,description)
-print(clientMsg)
+def join():
+	bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+	mesg_description = "Room Starting Description:\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description,"\n".join(items))
+	bytesToSend = str.encode(mesg_description)
+	message = bytesAddressPair[0]
+	address = bytesAddressPair[1]
+	clientMsg = "Room Starting Description:\n\n{}\n\n{}".format(name,description)
+	print(clientMsg)
   
 # Sending a reply to client
 
-UDPServerSocket.sendto(bytesToSend,address)
+	UDPServerSocket.sendto(bytesToSend,address)
 
 # Receiving a request from client
-pw_bytes = message.decode("utf-8")
-print(pw_bytes,address)
+	pw_bytes = message.decode("utf-8")
+	print(pw_bytes,address)
+	return address
+
+# pass cient ip address
+clientAddress = join()
+join()
 
 while(True):
 	bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
@@ -108,7 +111,10 @@ while(True):
 		result = drop(args)
 	elif command == 'inventory':
 		result = inventory()
+	elif command == 'exit':
+		signal.signal(signal.SIGINT, exit)
+		sys.exit("Interrupt received, shutting down...")
 	else:
-		print("Command doesn't exist.")
+		result = "Command doesn't exist."
 	bytesToSend = str.encode(result)
-	UDPServerSocket.sendto(bytesToSend,address)
+	UDPServerSocket.sendto(bytesToSend,clientAddress)

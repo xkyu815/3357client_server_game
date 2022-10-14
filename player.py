@@ -1,6 +1,8 @@
 import socket
 import argparse
 from urllib.parse import urlparse
+import signal
+import sys
 
 serverAddressPort   = ("127.0.0.1", 7777)
 bufferSize          = 1024
@@ -18,19 +20,25 @@ port = parse_result.port
 
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-#UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 #Send to server using created UDP socket
-msgFromClient       = "Room will wait for players at port: {}\nUser {} joined from address".format(port,playerName)
-bytesToSend         = str.encode(msgFromClient)
-UDPClientSocket.sendto(bytesToSend,serverAddressPort)
+def join():
+	msgFromClient       = "Room will wait for players at port: {}\nUser {} joined from address".format(port,playerName)
+	bytesToSend         = str.encode(msgFromClient)
+	UDPClientSocket.sendto(bytesToSend,serverAddressPort)
 
-msgFromServer = UDPClientSocket.recvfrom(bufferSize)
-address = msgFromServer[1]
-pw_bytes = msgFromServer[0].decode("utf-8")
-print(pw_bytes)
+	msgFromServer = UDPClientSocket.recvfrom(bufferSize)
+	address = msgFromServer[1]
+	pw_bytes = msgFromServer[0].decode("utf-8")
+	print(pw_bytes)
 
-# Pass unser input to the server
+def exit(sig, frame):
+	sys.exit(0)
+
+join()
+
+# Pass user input to the server
 while(True):
+	signal.signal(signal.SIGINT, exit)
 	userinput = input('> ')
 	commandToSend = str.encode(userinput)
 	UDPClientSocket.sendto(commandToSend,serverAddressPort)
