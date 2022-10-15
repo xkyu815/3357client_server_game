@@ -34,16 +34,16 @@ def join():
 def exit(sig, frame):
 	sys.exit(0)
 
-join()
-
+if __name__ == "__main__":
+	join()
 # Pass user input to the server
-while(True):
-	signal.signal(signal.SIGINT, exit)
-	userinput = input('> ')
-	commandToSend = str.encode(userinput)
-	UDPClientSocket.sendto(commandToSend,serverAddressPort)
-	resultFromServer = UDPClientSocket.recvfrom(bufferSize)
-	result = resultFromServer[0].decode("utf-8")
-	print(result)
+	while(True):
+		signal.signal(signal.SIGINT, exit)
+		userinput = input('> ')
+		commandToSend = str.encode(userinput)
+		UDPClientSocket.sendto(commandToSend,serverAddressPort)
+		resultFromServer = UDPClientSocket.recvfrom(bufferSize)
+		result = resultFromServer[0].decode("utf-8")
+		print(result)
 
 	

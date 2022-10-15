@@ -34,7 +34,7 @@ user_inventory = []
 itemInRoom = items
 
 def look():
-	if items is not None:
+	if len(itemInRoom)>0 :
 		mesg = "\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description,"\n".join(itemInRoom))
 	else:
 		mesg = "\n{}\n\n{}\n\nThe room is empty.".format(name,description)
@@ -42,7 +42,7 @@ def look():
 
 def take(item):
 	if item not in itemInRoom:
-		mesg = "Item cannot be taken.The item must exist in the room to be taken"
+		mesg = "{} cannot be taken.The item must exist in the room to be taken".format(item)
 	else:
 		mesg = "{} taken".format(item)
 		user_inventory.append(item)
@@ -82,29 +82,29 @@ def join():
 	UDPServerSocket.sendto(bytesToSend,address)  # Sending a reply to client
 	return address
 
+if __name__ == "__main__":
 # pass cient ip address
-clientAddress = join()
-
-while(True):
-	bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-	message = bytesAddressPair[0]
-	pw_bytes = message.decode("utf-8")
-	tokens = pw_bytes.split(' ')
-	command = tokens[0]
-	if len(tokens) > 1:
-		args = tokens[1]
-	if command == 'look':
-		result = look()
-	elif command == 'take':
-		result = take(args)
-	elif command == 'drop':
-		result = drop(args)
-	elif command == 'inventory':
-		result = inventory()
-	elif command == 'exit':
-		signal.signal(signal.SIGINT, exit)
-		sys.exit("Interrupt received, shutting down...")
-	else:
-		result = "Command doesn't exist."
-	bytesToSend = str.encode(result)
-	UDPServerSocket.sendto(bytesToSend,clientAddress)
+	clientAddress = join()
+	while(True):
+		bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+		message = bytesAddressPair[0]
+		pw_bytes = message.decode("utf-8")
+		tokens = pw_bytes.split(' ')
+		command = tokens[0]
+		if len(tokens) > 1:
+			args = tokens[1]
+		if command == 'look':
+			result = look()
+		elif command == 'take':
+			result = take(args)
+		elif command == 'drop':
+			result = drop(args)
+		elif command == 'inventory':
+			result = inventory()
+		elif command == 'exit':
+			signal.signal(signal.SIGINT, exit)
+			sys.exit("Interrupt received, shutting down...")
+		else:
+			result = "Command doesn't exist."
+		bytesToSend = str.encode(result)
+		UDPServerSocket.sendto(bytesToSend,clientAddress)
