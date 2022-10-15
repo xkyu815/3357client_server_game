@@ -29,7 +29,7 @@ def join():
 	msgFromServer = UDPClientSocket.recvfrom(bufferSize)
 	address = msgFromServer[1]
 	pw_bytes = msgFromServer[0].decode("utf-8")
-	print(pw_bytes)
+	sys.stdout.write(pw_bytes + '\n')
 
 def exit(sig, frame):
 	sys.exit(0)
@@ -44,6 +44,6 @@ if __name__ == "__main__":
 		UDPClientSocket.sendto(commandToSend,serverAddressPort)
 		resultFromServer = UDPClientSocket.recvfrom(bufferSize)
 		result = resultFromServer[0].decode("utf-8")
-		print(result)
+		sys.stdout.write(result + '\n') 
 
 	

@@ -72,7 +72,7 @@ def exit(sig, frame):
 
 def join():
 	mesg_description = "Room Starting Description:\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description,"\n".join(items))
-	print(mesg_description)
+	sys.stdout.write(mesg_description + '\n')
 	bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)  # Receiving a request from client
 	bytesToSend = str.encode(mesg_description)
 	message = bytesAddressPair[0]
