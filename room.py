@@ -16,8 +16,9 @@ options = parser.parse_args()
 
 description = options.description  # player name from server
 name = options.name     # description from server
-items = options.items 
-localPort = options.port   
+items = options.items   
+localPort = options.port 
+
 # Create a datagram socket
 
 UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -25,10 +26,6 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
  # Bind to address and ip
 
 UDPServerSocket.bind((localIP, localPort))
-
-print("UDP server up and listening")
-
- # Listen for incoming datagrams
 
 # initialize inventory
 user_inventory = []
@@ -74,26 +71,19 @@ def exit(sig, frame):
 	sys.exit(0)
 
 def join():
-	bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
 	mesg_description = "Room Starting Description:\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description,"\n".join(items))
+	print(mesg_description)
+	bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)  # Receiving a request from client
 	bytesToSend = str.encode(mesg_description)
 	message = bytesAddressPair[0]
 	address = bytesAddressPair[1]
-	clientMsg = "Room Starting Description:\n\n{}\n\n{}".format(name,description)
-	print(clientMsg)
-  
-# Sending a reply to client
-
-	UDPServerSocket.sendto(bytesToSend,address)
-
-# Receiving a request from client
 	pw_bytes = message.decode("utf-8")
 	print(pw_bytes,address)
+	UDPServerSocket.sendto(bytesToSend,address)  # Sending a reply to client
 	return address
 
 # pass cient ip address
 clientAddress = join()
-join()
 
 while(True):
 	bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
