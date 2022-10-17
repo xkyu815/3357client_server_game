@@ -3,7 +3,6 @@ import argparse
 import signal
 import sys
 
-localIP     = "127.0.0.1"
 bufferSize  = 1024
 
 parser = argparse.ArgumentParser("server parameters passed")
@@ -25,7 +24,7 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
  # Bind to address and ip
 
-UDPServerSocket.bind((localIP, localPort))
+UDPServerSocket.bind(('', localPort))
 
 # initialize inventory
 user_inventory = []

@@ -16,7 +16,6 @@ playerName = options.playerName
 hostname = parse_result.hostname
 port = parse_result.port
 
-serverAddressPort   = ("127.0.0.1", port)
 # Create a UDP socket at client side
 
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -25,7 +24,7 @@ UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 def join():
 	msgFromClient       = "Room will wait for players at port: {}\nUser {} joined from address".format(port,playerName)
 	bytesToSend         = str.encode(msgFromClient)
-	UDPClientSocket.sendto(bytesToSend,serverAddressPort)
+	UDPClientSocket.sendto(bytesToSend,(hostname,port))
 
 	msgFromServer = UDPClientSocket.recvfrom(bufferSize)
 	address = msgFromServer[1]
@@ -45,7 +44,7 @@ if __name__ == "__main__":
 		if userinput == 'exit':
 			quit()
 		commandToSend = str.encode(userinput)
-		UDPClientSocket.sendto(commandToSend,serverAddressPort)
+		UDPClientSocket.sendto(commandToSend,(hostname,port))
 		resultFromServer = UDPClientSocket.recvfrom(bufferSize)
 		result = resultFromServer[0].decode("utf-8")
 		sys.stdout.write(result + '\n') 

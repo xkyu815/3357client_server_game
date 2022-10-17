@@ -10,5 +10,5 @@
    python3 player.py player's name and server address
    ```
 3. Input command in the player terminal 
-4. Hit Ctrl + C in both room and player terminal to terminate the program. Alternatively, enter exit in player terminal. 
+4. Hit Ctrl + C in both room and player terminal to terminate the program. Alternatively, enter exit in player terminal to terminate the program. 
 
