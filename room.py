@@ -68,7 +68,7 @@ def drop(item):
 def exit(sig, frame):
 	while user_inventory != []:
 		drop(user_inventory[0])
-	sys.exit(0)
+	sys.exit("Interrupt received, shutting down...")
 
 def join():
 	mesg_description = "Room Starting Description:\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description,"\n".join(items))
@@ -83,9 +83,10 @@ def join():
 	return address
 
 if __name__ == "__main__":
-# pass cient ip address
+# pass client ip address
 	clientAddress = join()
 	while(True):
+		signal.signal(signal.SIGINT, exit)
 		bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
 		message = bytesAddressPair[0]
 		pw_bytes = message.decode("utf-8")
@@ -101,9 +102,6 @@ if __name__ == "__main__":
 			result = drop(args)
 		elif command == 'inventory':
 			result = inventory()
-		elif command == 'exit':
-			signal.signal(signal.SIGINT, exit)
-			sys.exit("Interrupt received, shutting down...")
 		else:
 			result = "Command doesn't exist."
 		bytesToSend = str.encode(result)

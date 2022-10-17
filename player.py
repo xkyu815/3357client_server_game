@@ -1,3 +1,4 @@
+from re import U
 import socket
 import argparse
 from urllib.parse import urlparse
@@ -35,11 +36,14 @@ def exit(sig, frame):
 	sys.exit(0)
 
 if __name__ == "__main__":
+	signal.signal(signal.SIGINT, exit)
 	join()
 # Pass user input to the server
 	while(True):
-		signal.signal(signal.SIGINT, exit)
+		
 		userinput = input('> ')
+		if userinput == 'exit':
+			quit()
 		commandToSend = str.encode(userinput)
 		UDPClientSocket.sendto(commandToSend,serverAddressPort)
 		resultFromServer = UDPClientSocket.recvfrom(bufferSize)
