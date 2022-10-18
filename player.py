@@ -15,6 +15,10 @@ parse_result = urlparse(options.serverAddress)
 playerName = options.playerName
 hostname = parse_result.hostname
 port = parse_result.port
+if (playerName == None or hostname == None or port == None):
+	mesg = "Invalid server address\n"
+	sys.stdout.write(mesg)
+	quit()
 
 # Create a UDP socket at client side
 
@@ -39,7 +43,6 @@ if __name__ == "__main__":
 	join()
 # Pass user input to the server
 	while(True):
-		
 		userinput = input('> ')
 		if userinput == 'exit':
 			quit()
