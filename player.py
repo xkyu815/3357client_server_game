@@ -46,15 +46,13 @@ def do_prompt(skip_line=False):
 # Function to handle incoming messages from server.
 def handle_keyboard_input(file, mask):
     # Prompt the user before beginning.
-
         # Get a line of input.
-
         line=sys.stdin.readline()[:-1]
-        client_socket.send(line.encode())
-
-        # Process command and send to the server.
+        message = input('> ')
+        #client_socket.send(message.encode())
         do_prompt()
-        process_command(client_socket,mask)
+        client_socket.send(message.encode())
+        # Process command and send to the server.
 
 # Function to join a room.
 
@@ -65,17 +63,21 @@ def join_room():
    # client_socket.setblocking(False)
     print(response.decode())
 
-def send_player_name(sock,mask):
+def send_player_name():
+    send_player_name()
     playername = name
-    sock.send(playername.encode())
-    playerNotifyfromServer = sock.recv(1024).decode()
+    client_socket.send(playername.encode())
+    playerNotifyfromServer = client_socket.recv(1024).decode()
     print(playerNotifyfromServer)
 
 # Function to handle commands from the user, checking them over and sending to the server as needed.
 
-def process_command(file,mask):
+def handle_server(sock,mask):
+    response = client_socket.recv(1024).decode()
+    print(response)
+def process_command(command):
     # Parse command.
-    command = file.recv(1024).decode()
+    
     words = command.split()
 
     # Check if we are dropping something.  Only let server know if it is in our inventory.
@@ -124,7 +126,7 @@ def process_command(file,mask):
     else:
         response = client_socket.recv(1024)
         print(response.decode())
-    client_socket.setblocking(False)
+    
 
 # Our main function.
 
@@ -175,14 +177,16 @@ def main():
     # Send message to enter the room.
 
     join_room()
-   
+    
 
     # Set up our selector.
 
     client_socket.setblocking(False)
-    sel.register(client_socket, selectors.EVENT_READ,
-                 send_player_name)
-    #sel.register(sys.stdin, selectors.EVENT_READ, handle_keyboard_input)
+    sel.register(client_socket, selectors.EVENT_READ,handle_server)
+    sel.register(sys.stdin, selectors.EVENT_READ, handle_keyboard_input)
+    
+    
+    
 
     
     # We now loop forever, sending commands to the server and reporting results
