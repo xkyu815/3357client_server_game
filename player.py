@@ -57,7 +57,7 @@ def handle_keyboard_input(file, mask):
 # Function to join a room.
 
 def join_room():
-    message = f'join {name}'
+    message = name
     client_socket.send(message.encode())
     response = client_socket.recv(1024)
    # client_socket.setblocking(False)

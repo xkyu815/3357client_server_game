@@ -29,45 +29,50 @@ def signal_handler(sig, frame):
 
 # initialize inventory
 user_inventory = []
-
+playername_list = []
+my_clientList = []
 # Items in the room initially
 
 def look():
-	if len(items)>0 :
-		mesg = "\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description,"\n".join(items))
-	else:
-		mesg = "\n{}\n\n{}\n\nThe room is empty.".format(name,description)
-	return mesg
+    if len(items)>0 :
+        mesg = "\n{}\n\n{}\n\nIn this room, there are:\n{}\n{}".format(name,description,"\n".join(items),"\n".join(playername_list))
+    elif len(items)==0 and len(playername_list)>0:
+        mesg = "\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description,"\n".join(playername_list))
+    elif len(items)>0 and len(playername_list)==0:
+        mesg = "\n{}\n\n{}\n\nIn this room, there are:\n{}".format(name,description)
+    else:
+        mesg = "\n{}\n\n{}\n\nThe room is empty.".format(name,description)
+    return mesg
 
 def take(item):
-	if item not in items:
-		mesg = "{} cannot be taken.The item must exist in the room to be taken".format(item)
-	else:
-		mesg = "{} taken".format(item)
-		user_inventory.append(item)
-		items.remove(item)
-	return mesg
+    if item not in items:
+        mesg = "{} cannot be taken.The item must exist in the room to be taken".format(item)
+    else:
+        mesg = "{} taken".format(item)
+        user_inventory.append(item)
+        items.remove(item)
+    return mesg
 
 def inventory():
-	if user_inventory == []:
-		mesg = "Holding nothing"
-	else:
-		mesg = "You are holding: \n{}".format("\n".join(user_inventory))
-	return mesg
+    if user_inventory == []:
+        mesg = "Holding nothing"
+    else:
+        mesg = "You are holding: \n{}".format("\n".join(user_inventory))
+    return mesg
 
 def drop(item):
-	if item not in user_inventory:
-		mesg = "You are not holding {}".format(item)
-	else:
-		user_inventory.remove(item)
-		items.append(item)
-		mesg = "You are dropping {}".format(item)
-	return mesg
+    if item not in user_inventory:
+        mesg = "You are not holding {}".format(item)
+    else:
+        user_inventory.remove(item)
+        items.append(item)
+        mesg = "You are dropping {}".format(item)
+    return mesg
 
 def exit(sig, frame):
-	while user_inventory != []:
-		drop(user_inventory[0])
-	sys.exit("Interrupt received, shutting down...")
+    while user_inventory != []:
+        drop(user_inventory[0])
+    sys.exit("Interrupt received, shutting down...")
 
 def client_search(player):
     for reg in client_list:
@@ -130,77 +135,21 @@ def print_room_summary():
 
 # Process incoming message.
 def handle_message_from_server(sock,mask):
-	message = sock.recv(1024).decode()
-	tokens = message.split()
-	command = tokens[0]
-	if len(tokens) > 1:
-		args = tokens[1]
-	if command == 'look':
-		result = look()
-	elif command == 'take':
-		result = take(args)
-	elif command == 'drop':
-		result = drop(args)
-	elif command == 'inventory':
-		result = inventory()
-	else:
-		result = "Command doesn't exist."
-	sock.send(result.encode())
-
-def process_message(sock,mask):
-
-    # Parse the message.
-   # conn, addr = sock.accept()
     message = sock.recv(1024).decode()
-    words = message.split()
-
-    # If player is joining the server, add them to the list of players.
-    if (words[0] == 'join'):
-        if (len(words) == 2):
-            client_add(words[1],addr)
-            print(f'User {words[1]} joined from address {addr}')
-            result =  summarize_room()[:-1]
-        else:
-            result = "Invalid command"
-
-    # If player is leaving the server. remove them from the list of players.
-
-    elif (message == 'exit'):
-        client_remove(client_search_by_address(addr))
-        result = 'Goodbye'
-        sel.unregister(sock)
-        sock.close()
-
-    # If player looks around, give them the room summary.
-
-    elif (message == 'look'):
-        result = summarize_room()[:-1]
-            
-    # If player takes an item, make sure it is here and give it to the player.
-
-    elif (words[0] == 'take'):
-        if (len(words) == 2):
-            if (words[1] in items):
-                items.remove(words[1])
-                result = f'{words[1]} taken'
-            else:
-                result = f'{words[1]} cannot be taken in this room'
-        else:
-            result = "Invalid command"
-
-    # If player drops an item, put in in the list of things here.
-
-    elif (words[0] == 'drop'):
-        if (len(words) == 2):
-            items.append(words[1])
-            result = f'{words[1]} dropped'
-        else:
-            result = "Invalid command"
-
-    # Otherwise, the command is bad.
-
+    tokens = message.split()
+    command = tokens[0]
+    if len(tokens) > 1:
+        args = tokens[1]
+    if command == 'look':
+        result = look()
+    elif command == 'take':
+        result = take(args)
+    elif command == 'drop':
+        result = drop(args)
+    elif command == 'inventory':
+        result = inventory()
     else:
-        result = "Invalid command"
+        result = "Command doesn't exist."
     sock.send(result.encode())
 
 def accept_client(sock,mask):
@@ -211,9 +160,12 @@ def accept_client(sock,mask):
     playername = player_sock.recv(1024).decode()
     client_add(player_sock,playername)
     for playersock, player_name in client_list:
+        if playername not in playername_list:
+            playername_list.append(playername)
         if player_name != playername:
             message = "\n{} enters the room.".format(playername)
             playersock.send(message.encode())
+            
    # player_sock.setblocking(False)
     sel.register(player_sock, selectors.EVENT_READ, handle_message_from_server)
 
@@ -236,7 +188,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     #opparser = OptionParser()
-    #opparser.add_option("-s", help="direction of a new room")
+    #parser.add_argument("direction", help="direction of a new room")
     #parser.add_argument("new_room", help="URL for the new room")
     parser.add_argument("port", type=int, help="port number to list on")
     parser.add_argument("name", help="name of the room")
@@ -245,7 +197,7 @@ def main():
     args = parser.parse_args()
     #opt = opparser.parse_args()
 
-    #direction = opt.direction
+    #direction = args.direction
     #new_room = args.new_room
     port=args.port
     name = args.name
