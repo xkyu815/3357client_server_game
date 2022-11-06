@@ -25,6 +25,9 @@ name = ''
 
 inventory = []
 
+# a list of directions command.
+directions = ['north', 'south', 'east', 'west', 'up', 'down']
+
 # Signal handler for graceful exiting.  Let the server know when we're gone.
 
 def signal_handler(sig, frame):
@@ -38,11 +41,12 @@ def signal_handler(sig, frame):
 
 # Simple function for setting up a prompt for the user.
 
+
 def do_prompt(skip_line=False):
-    if (skip_line):
+    if skip_line:
         print("")
     print("> ", end='', flush=True)
-
+    
 # Function to handle incoming messages from server.
 def handle_keyboard_input(file, mask):
     # Prompt the user before beginning.
@@ -79,9 +83,11 @@ def process_command(command):
     # Parse command.
     
     words = command.split()
+    if words[0] in directions:
+        client_socket.send(words[0].encode())
 
     # Check if we are dropping something.  Only let server know if it is in our inventory.
-
+    
     if (words[0] == 'drop'):
         if (len(words) != 2):
             print("Invalid command")
@@ -183,12 +189,8 @@ def main():
 
     client_socket.setblocking(False)
     sel.register(client_socket, selectors.EVENT_READ,handle_server)
+    #sel.register(sys.stdin, selectors.EVENT_READ, handle_keyboard_input)
     sel.register(sys.stdin, selectors.EVENT_READ, handle_keyboard_input)
-    
-    
-    
-
-    
     # We now loop forever, sending commands to the server and reporting results
 
     while True:
